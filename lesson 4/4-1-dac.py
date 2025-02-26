@@ -7,7 +7,7 @@ dac = [8, 11, 7, 1, 0, 5, 12, 6]
 
 
 def dec2bin(num):
-    return [(num >> 1) & 1 for i in range (7, -1, -1)]
+    return [int(num >> (7 - i)) & 1 for i in range (8)]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(dac, GPIO.OUT)
