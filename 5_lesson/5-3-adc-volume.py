@@ -128,3 +128,51 @@ Traceback (most recent call last):
     if GPIO.output(comp) == 0:
 TypeError: function takes exactly 2 arguments (1 given)
 
+import RPi.GPIO as GPIO
+from time import sleep
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
+led = [24, 25, 8, 7, 12, 16, 20, 21]
+dac = [26, 19, 13, 6, 5, 11, 9, 10]
+comp = 4
+troyka = 17
+
+GPIO.setup(dac, GPIO.OUT, initial=0)
+GPIO.setup(led, GPIO.OUT)
+GPIO.setup(troyka, GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setup(comp, GPIO.IN)
+
+def dec2bin(num):
+    return [int(bit) for bit in bin(num)[2:].zfill(8)]
+
+def adc():
+    check = [0] * 8
+    result = 0
+
+    for i in range(8):
+        check[i] = 1
+        GPIO.output(dac, check)
+        sleep(0.001)
+        
+        # Исправлено: GPIO.input() вместо GPIO.output()
+        if GPIO.input(comp) == 0:
+            result += 2**(7 - i)
+        else:
+            check[i] = 0
+
+    volumes = [0, 32, 64, 96, 128, 160, 192, 224, 255]
+    closest = min(volumes, key=lambda x: abs(x - result))
+    return closest
+
+try:
+    while True:
+        value = adc()
+        GPIO.output(led, dec2bin(value))
+        print(value)
+
+finally:
+    GPIO.output(dac, 0)
+    GPIO.output(troyka, 0)
+    GPIO.cleanup()
