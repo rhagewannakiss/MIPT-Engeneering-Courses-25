@@ -24,12 +24,15 @@ def adc():
         GPIO.output(dac, dac_val)
         sleep(0.01)
         comp_val = GPIO.input(comp)
+        print("i: ", i, "k:  ", k, "bin:  ", dac_val, "comp val: ", comp_val)
         if comp_val == 0:
             k -= 2**i
+            print("k: ", k)
     return k
 
 def Volume(val):
     val = int(val/256*10)
+    print("value: ", val)
     arr = [0]*8
     for i in range(val - 1):
         arr[i] = 1
@@ -46,3 +49,19 @@ finally:
     GPIO.output(dac, 0)
     GPIO.cleanup()
     print("EOP")
+
+
+...
+i:  3 k:   8 bin:   [0, 0, 0, 0, 1, 0, 0, 0] comp val:  0
+k:  0
+i:  2 k:   4 bin:   [0, 0, 0, 0, 0, 1, 0, 0] comp val:  0
+k:  0
+i:  1 k:   2 bin:   [0, 0, 0, 0, 0, 0, 1, 0] comp val:  0
+k:  0
+i:  0 k:   1 bin:   [0, 0, 0, 0, 0, 0, 0, 1] comp val:  1
+value:  0
+EOP
+Traceback (most recent call last):
+  File "/home/b01-403/scripts/йоу/5-3-ADC-volume.py", line 46, in <module>
+    GPIO.output(led, volume_val)
+RuntimeError: The GPIO channel has not been set up as an OUTPUT
