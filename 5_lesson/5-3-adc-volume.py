@@ -65,3 +65,51 @@ Traceback (most recent call last):
   File "/home/b01-403/scripts/йоу/5-3-ADC-volume.py", line 46, in <module>
     GPIO.output(led, volume_val)
 RuntimeError: The GPIO channel has not been set up as an OUTPUT
+
+
+import RPi.GPIO as GPIO
+from time import sleep
+
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+
+led = [21, 20, 16, 12, 7, 8, 25, 24]
+dac = [26, 19, 13, 6, 5, 11, 9, 10]
+comp = 4
+troyka = 17
+
+GPIO.setup(dac, GPIO.OUT)
+GPIO.setup(led, GPIO.OUT)
+GPIO.setup(troyka, GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setup(comp, GPIO.IN)
+
+def dec2bin(num):
+    return [int(bit) for bit in bin(num)[2:].zfill(8)]
+
+def adc():
+    value = 0
+    for i in range(7, -1, -1):
+        step = value + 2**i
+        GPIO.output(dac, dec2bin(step))
+        sleep(0.001)
+        if GPIO.input(comp) == GPIO.HIGH:
+            value = step
+    return value
+
+def volume_level(value):
+    level = int(value / 256 * 8)
+    return [1 if i < level else 0 for i in range(8)]
+
+try:
+    while True:
+        adc_value = adc()
+        leds_state = volume_level(adc_value)
+        GPIO.output(led, leds_state)
+        voltage = adc_value / 255 * 3.3
+        print(f"ADC: {adc_value:3d}, Voltage: {voltage:.2f}V, LEDs: {sum(leds_state)}")
+
+finally:
+    GPIO.output(dac, 0)
+    GPIO.output(led, 0)
+    GPIO.cleanup()
+    print("Program terminated")
