@@ -74,3 +74,5 @@ print("Шаг квантования АЦП: 13мВ")
 plt.plot([i for i in range(0,len(vt))],[(i/255)*3.3 for i in vt],c="blue")
 plt.grid()
 plt.show()
+
+мяу
